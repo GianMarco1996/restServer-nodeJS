@@ -1,18 +1,22 @@
 const express = require('express');
-const Usuario = require('../models/usuario');
+
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 
+const Usuario = require('../models/usuario');
+const { verificarToken, verificarAdminRole } = require('../middlewares/autenticacion');
+
 const app = express();
 
-app.get('/usuario', (req, res) => {
+
+app.get('/usuario', verificarToken, (req, res) => {
     let desde = req.query.desde || 0;
     desde = Number(desde);
 
     let limite = req.query.limite || 5;
     limite = Number(limite);
 
-    Usuario.find({ estado: true }, 'nombre email img role google estado')
+    Usuario.find({ estado: true }, 'nombre email role estado google img')
         .skip(desde)
         .limit(limite)
         .exec((err, usuarios) => {
@@ -28,12 +32,12 @@ app.get('/usuario', (req, res) => {
                     ok: true,
                     usuarios,
                     total: conteo
-                })
-            })
-        })
+                });
+            });
+        });
 });
 
-app.post('/usuario', (req, res) => {
+app.post('/usuario', [verificarToken, verificarAdminRole], (req, res) => {
     let body = req.body;
 
     let usuario = new Usuario({
@@ -58,10 +62,10 @@ app.post('/usuario', (req, res) => {
             ok: true,
             usuario: usuarioDB
         })
-    })
+    });
 });
 
-app.put('/usuario/:id', (req, res) => {
+app.put('/usuario/:id', [verificarToken, verificarAdminRole], (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'email', 'img', 'role', 'estado']);
 
@@ -85,7 +89,7 @@ app.put('/usuario/:id', (req, res) => {
 
 });
 
-app.delete('/usuario/:id', (req, res) => {
+app.delete('/usuario/:id', [verificarToken, verificarAdminRole], (req, res) => {
     let id = req.params.id;
 
     /* Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
@@ -120,15 +124,6 @@ app.delete('/usuario/:id', (req, res) => {
             return res.status(400).json({
                 ok: false,
                 err
-            });
-        }
-
-        if (actualizarEstado.estado === false) {
-            return res.status(400).json({
-                ok: false,
-                err: {
-                    message: 'No se encontro usuario'
-                }
             });
         }
 
