@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 const path = require('path');
 
 const app = express();
+
+// bodyParser permite procesar la información y serializa en onj JSON para que sea procesada en las peticiones POST
 const bodyParser = require('body-parser');
 
 // parse application/x-www-form-urlencoded

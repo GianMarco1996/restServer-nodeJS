@@ -1,6 +1,8 @@
 const express = require('express');
 
 const bcrypt = require('bcrypt');
+
+//underscore expande mucha mas funcionalidades de JavaScript
 const _ = require('underscore');
 
 const Usuario = require('../models/usuario');
